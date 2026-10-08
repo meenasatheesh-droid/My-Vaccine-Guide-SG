@@ -3,7 +3,26 @@
  * Endpoint: https://server.smithery.ai/pubmed
  */
 
+import dotenv from 'dotenv';
+dotenv.config();
+
 const PUBMED_MCP_ENDPOINT = 'https://server.smithery.ai/pubmed';
+
+/**
+ * Returns formatted Authorization header with Bearer token
+ */
+function getAuthHeader() {
+  const token = (
+    process.env.SMITHERY_API_KEY ||
+    process.env.PUBMED_MCP_KEY ||
+    process.env.PUBMED_API_KEY ||
+    process.env.MCP_API_KEY ||
+    process.env.SMITH_API_KEY ||
+    ''
+  ).trim();
+
+  return token ? (token.startsWith('Bearer ') ? token : `Bearer ${token}`) : 'Bearer anonymous';
+}
 
 /**
  * Check connection to the PubMed MCP server and measure real latency
@@ -16,11 +35,9 @@ export async function checkMcpConnection() {
 
     const headers = {
       'Content-Type': 'application/json',
-      'Accept': 'application/json'
+      'Accept': 'application/json',
+      'Authorization': getAuthHeader()
     };
-    if (process.env.SMITHERY_API_KEY || process.env.PUBMED_MCP_KEY) {
-      headers['Authorization'] = `Bearer ${process.env.SMITHERY_API_KEY || process.env.PUBMED_MCP_KEY}`;
-    }
 
     // Test JSON-RPC ping or tools/list on the MCP server
     const response = await fetch(PUBMED_MCP_ENDPOINT, {
@@ -93,11 +110,9 @@ export async function queryPubmedMcp(query = 'adult vaccination Singapore', limi
 
     const headers = {
       'Content-Type': 'application/json',
-      'Accept': 'application/json'
+      'Accept': 'application/json',
+      'Authorization': getAuthHeader()
     };
-    if (process.env.SMITHERY_API_KEY || process.env.PUBMED_MCP_KEY) {
-      headers['Authorization'] = `Bearer ${process.env.SMITHERY_API_KEY || process.env.PUBMED_MCP_KEY}`;
-    }
 
     const response = await fetch(PUBMED_MCP_ENDPOINT, {
       method: 'POST',
